@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+    <form>
+      <label>字體：</label>
+      <select name="font">
+        <% for (let font of fonts) { %>
+          <option value="<%= font %>"><%= font %></option>
+        <% } %>
+      </select>
+      <label>字符：</label>
+      <textarea name="chars"></textarea>
+      <input type="submit" value="壓縮"/>
+    </form>
+  </body>
+  <script>
+    document.querySelector('form').addEventListener('submit', async (event) => {
+      event.preventDefault(); 
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      const jsonData = Object.fromEntries(formData.entries());
+
+      try {
+        const response = await fetch('/upload', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(jsonData),
+        });
+
+        if (response.ok) {
+          const blob = await response.blob();
+          const link = document.createElement('a');
+          link.href = URL.createObjectURL(blob);
+          link.download = 'compressed-fonts.zip';
+          link.click();
+        } else {
+          alert('Failed to compress fonts');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred');
+      }
+    });
+  </script>
+</html>
